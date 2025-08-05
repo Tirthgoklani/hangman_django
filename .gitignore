@@ -1,0 +1,54 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+db.sqlite3
+
+# Environment variables
+.env
+.env.*
+
+# Django migrations (optional)
+*/migrations/
+!*/migrations/__init__.py
+
+# Static and media files (generated in prod)
+staticfiles/
+static/
+media/
+
+# VSCode and IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python environment folders
+venv/
+env/
+ENV/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Testing
+coverage/
+htmlcov/
+.tox/
+.pytest_cache/
+
+# Render/Gunicorn logs (optional)
+gunicorn.log
