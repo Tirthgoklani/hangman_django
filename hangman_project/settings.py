@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-zt@7&q1=q9xhj1=(e!tr47t2gx4&-(tj&ibwy@=*%@pubhjf%k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -115,8 +115,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+import os
+
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "hangman_app" / "static"]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Optional (if not already):
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
 
 
 # Default primary key field type
