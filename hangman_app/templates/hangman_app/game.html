@@ -1,0 +1,252 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'hangman_app/js/game.js' %}"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f9fafb; /* Very light gray */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        color: #1e293b; /* Darker text */
+    }
+
+    .container {
+        background-color: #fff;
+        border-radius: 1.5rem; /* More rounded corners */
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+        width: 95%;
+        max-width: 1200px;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #2563eb; /* Blue */
+    }
+
+    select {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 2px solid #e2e8f0;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+        outline: none;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, #3b82f6, #6366f1);
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(to right, #64748b, #475569);
+        color: white;
+        border: none;
+    }
+
+    .btn-secondary:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    .keyboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 0.6rem;
+    }
+
+    .key {
+        height: 55px;
+        background-color: #14497e !important;
+        color: #ffffff;
+        border-radius: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .key:hover:not(:disabled) {
+        background-color: #e2e8f0;
+        transform: translateY(-1px);
+    }
+
+    .key:disabled {
+        background-color: #e5e7eb;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .guessed-letter {
+        display: inline-block;
+        width: 45px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+        border-bottom: 4px solid #64748b;
+        margin: 0 6px;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    #gameCanvas {
+        background-color: #f8fafc;
+        border-radius: 1rem;
+        border: 2px solid #e2e8f0;
+        box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 450px;
+        height: 600px;
+    }
+
+    #remainingChances {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        color: #1e293b;
+    }
+
+    #message {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #dc2626; /* red for messages */
+        margin-top: 1rem;
+    }
+
+    @media (min-width: 768px) {
+        .game-layout {
+            flex-direction: row;
+        }
+
+        #gameCanvas {
+            width: 450px;
+        }
+    }
+    .game-layout {
+    display: flex;
+    flex-direction: column; /* Default for mobile */
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .game-layout {
+        flex-direction: row; /* Row layout on desktop */
+        align-items: flex-start;
+    }
+}
+
+</style>
+
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="container">
+        <!-- Initial Selection Screen -->
+        <div id="selectionScreen" class="flex flex-col items-center gap-6 p-8">
+            <h1 class="text-4xl font-extrabold text-blue-700 mb-6">Hangman Game</h1>
+
+            <div class="w-full max-w-md">
+                <label for="difficulty" class="block text-lg font-semibold mb-2 text-gray-700">Select Difficulty:</label>
+                <select id="difficulty" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out">
+                    <option value="easy">Easy (4-6 letters)</option>
+                    <option value="medium">Medium (6-7 letters)</option>
+                    <option value="hard">Hard (7-8 letters)</option>
+                </select>
+            </div>
+
+            <div class="w-full max-w-md">
+                <label for="category" class="block text-lg font-semibold mb-2 text-gray-700">Select Category:</label>
+                <select id="category" class="w-full p-3 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out">
+                    <option value="food">Food</option>
+                    <option value="country">Country</option>
+                    <option value="animal">Animal</option>
+                    <option value="sport">Sport</option>
+                    <option value="fruit">Fruit</option>
+                    <option value="random" selected>Random</option>
+                </select>
+            </div>
+
+            <button id="startGameBtn" class="btn btn-primary w-full max-w-xs mt-6">Start Game</button>
+        </div>
+
+<!-- Game Screen -->
+<div id="gameScreen" class="hidden game-layout">
+    <!-- Left Side: Hangman Drawing -->
+    <div class="flex-shrink-0 flex flex-col items-center gap-4">
+        <canvas id="gameCanvas" width="400" height="300"></canvas>
+
+        
+
+    </div>
+
+    <!-- Right Side: Keyboard + Word + Chances -->
+<div class="flex-grow flex flex-col items-center gap-6 w-full md:w-auto">
+    <!-- Word display -->
+    <div id="wordDisplay" class="flex justify-center text-6xl flex-wrap gap-2 mb-4 text-center">
+        <!-- Guessed letters will appear here -->
+    </div>
+
+    <!-- Message -->
+    <div id="message" class="text-xl font-semibold text-center mt-2"></div>
+
+    <!-- Remaining Chances -->
+    <div id="remainingChances" class="mb-6 text-center text-lg font-semibold">Remaining Chances: 5</div>
+
+    <!-- Keyboard -->
+    <div id="keyboard" class="keyboard-grid w-full max-w-md mx-auto">
+        <!-- Keyboard buttons will be generated here -->
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 mt-6 w-full justify-center">
+        <button id="newGameBtn" class="btn btn-secondary flex-1">New Game</button>
+        <button id="newWordBtn" class="btn btn-primary flex-1">New Word</button>
+    </div>
+</div>
+
+</div>
+
+    </div>
+
+
+</body>
+</html>
