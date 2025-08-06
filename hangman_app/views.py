@@ -23,17 +23,21 @@ def start_game(request):
         return JsonResponse({'error': 'No eligible words found'}, status=404)
 
     selected = random.choice(list(eligible_words))
-    
+        
     # Save game state in session
     request.session['word'] = selected.word.lower()
     request.session['category'] = selected.category
     request.session['guessed_letters'] = []
     request.session['incorrect_guesses'] = 0
 
+    # Initialize revealed letters with underscores
+    revealed = ['_' for _ in selected.word.lower()]
+
     return JsonResponse({
         'category': selected.category,  # for hint
         'length': len(selected.word),
-        'max_incorrect': 5
+        'max_incorrect': 5,
+        'revealed': revealed  # ADD THIS - JavaScript expects this field
     })
 
 def guess_letter(request):
@@ -62,13 +66,11 @@ def guess_letter(request):
     lost = incorrect >= 5
 
     return JsonResponse({
-    'revealed': revealed,
-    'incorrect_guesses': incorrect,
-    'guessed_letters': guessed,  # <--- ADD THIS
-    'won': won,
-    'lost': lost,
-    'original_word': word if lost else None,
-    'revealed': ['_' for _ in word]
-
-})
-
+        'revealed': revealed,
+        'incorrect_guesses': incorrect,
+        'guessed_letters': guessed,
+        'won': won,
+        'lost': lost,
+        'original_word': word if lost else None
+        # REMOVED: 'revealed': ['_' for _ in word]  # <-- This was overwriting the correct revealed array
+    })
