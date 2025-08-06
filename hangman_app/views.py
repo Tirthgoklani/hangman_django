@@ -67,6 +67,8 @@ def guess_letter(request):
     'guessed_letters': guessed,  # <--- ADD THIS
     'won': won,
     'lost': lost,
-    'original_word': word if lost else None
+    'original_word': word if lost else None,
+    'revealed': ['_' for _ in word]
+
 })
 

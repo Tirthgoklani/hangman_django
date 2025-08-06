@@ -71,7 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(`/guess_letter/?letter=${letter}`)
             .then(response => response.json())
             .then(data => {
-                revealedLetters = data.revealed;
+                if (data.error) {
+                    alert("Error starting game: " + data.error);
+                    return;
+                }
+
+                revealedLetters = Array.isArray(data.revealed) ? data.revealed : []
+                // revealedLetters = data.revealed;
                 guessedLetters = data.guessed_letters;
                 incorrectGuesses = data.incorrect_guesses;
 
