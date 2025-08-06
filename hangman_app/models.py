@@ -13,7 +13,6 @@ class Word(models.Model):
         ('animal', 'Animal'),
         ('sport', 'Sport'),
         ('fruit', 'Fruit'),
-        # ('random','Random'),
     ]
 
     word = models.CharField(max_length=50)
