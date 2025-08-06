@@ -1,19 +1,12 @@
 // --- Game State Variables ---
-let currentWord = "";
 let guessedLetters = [];
 let incorrectGuesses = 0;
-const maxIncorrectGuesses = 5;
-
+let maxIncorrectGuesses = 5;
 let selectedDifficulty = 'easy';
-let selectedCategory = 'random';
+let revealedLetters = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
-    const selectionScreen = document.getElementById('selectionScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    const difficultySelect = document.getElementById('difficulty');
-    const categorySelect = document.getElementById('category');
-    const startGameBtn = document.getElementById('startGameBtn');
     const gameCanvas = document.getElementById('gameCanvas');
     const ctx = gameCanvas.getContext('2d');
     const wordDisplay = document.getElementById('wordDisplay');
@@ -22,50 +15,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGameBtn = document.getElementById('newGameBtn');
     const newWordBtn = document.getElementById('newWordBtn');
     const remainingChancesDisplay = document.getElementById('remainingChances');
+    const categoryHint = document.getElementById('category-hint');
 
-    // --- Start Game Button ---
-    startGameBtn.addEventListener('click', () => {
-        selectedDifficulty = difficultySelect.value;
-        selectedCategory = categorySelect.value;
-        selectionScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
+    // --- Start Initial Game on Load ---
+    startGame(selectedDifficulty);
 
-        startGame(selectedDifficulty, selectedCategory);
-
-        messageDisplay.textContent = '';
-        // newGameBtn.style.display = 'none';
-        // newWordBtn.style.display = 'none';
-        updateRemainingChances();
-    });
-
-    // --- Start Game Function (merged) ---
-    function startGame(difficulty, category) {
-        fetch(`/get_random_word/?difficulty=${difficulty}&category=${category}`)
+    // --- Start Game ---
+    function startGame(difficulty) {
+        fetch(`/start_game/?difficulty=${difficulty}`)
             .then(response => response.json())
             .then(data => {
-                currentWord = data.word.toLowerCase();
                 guessedLetters = [];
                 incorrectGuesses = 0;
-
+                maxIncorrectGuesses = data.max_incorrect;
+                revealedLetters = data.revealed;
+                categoryHint.textContent = `Category Hint: ${data.category}`;
                 updateWordDisplay();
-                drawHangman();
                 createKeyboard();
+                messageDisplay.textContent = '';
                 updateRemainingChances();
+                drawHangman();
             })
             .catch(error => {
-                console.error("Error fetching word:", error);
+                console.error("Error starting game:", error);
                 wordDisplay.textContent = '⚠️ Error loading word';
             });
     }
 
-    // --- Update Word Display (merged) ---
+    // --- Update Word Display ---
     function updateWordDisplay() {
         wordDisplay.innerHTML = "";
-        for (let letter of currentWord) {
+        for (let letter of revealedLetters) {
             const span = document.createElement("span");
             span.classList.add("letter");
-
-            span.textContent = guessedLetters.includes(letter) ? letter : "_";
+            span.textContent = letter === '_' ? "_" : letter;
             wordDisplay.appendChild(span);
         }
     }
@@ -84,20 +67,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Handle Letter Guess ---
-    function handleGuess(letter) {
-        if (!guessedLetters.includes(letter)) {
-            guessedLetters.push(letter);
+    function handleGuess(letter, button) {
+        fetch(`/guess_letter/?letter=${letter}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Error starting game: " + data.error);
+                    return;
+                }
 
-            if (!currentWord.includes(letter)) {
-                incorrectGuesses++;
+                revealedLetters = Array.isArray(data.revealed) ? data.revealed : []
+                // revealedLetters = data.revealed;
+                guessedLetters = data.guessed_letters;
+                incorrectGuesses = data.incorrect_guesses;
+
+                updateWordDisplay();
+                updateKeyboardState();
+                updateRemainingChances();
                 drawHangman();
-            }
 
-            updateWordDisplay();
-            updateKeyboardState();
-            updateRemainingChances();
-            checkGameStatus();
-        }
+                if (data.won) {
+                    messageDisplay.textContent = '🎉 You won!';
+                    disableKeyboard();
+                    newGameBtn.style.display = 'inline-block';
+                    newWordBtn.style.display = 'inline-block';
+                } else if (data.lost) {
+                    messageDisplay.textContent = `💀 You lost! Word was: ${data.original_word.toUpperCase()}`;
+                    disableKeyboard();
+                    newGameBtn.style.display = 'inline-block';
+                    newWordBtn.style.display = 'inline-block';
+                }
+            });
     }
 
     // --- Update Keyboard State ---
@@ -106,25 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
         keys.forEach(key => {
             const letter = key.textContent.toLowerCase();
             key.disabled = guessedLetters.includes(letter);
-            key.classList.toggle('correct', currentWord.includes(letter));
-            key.classList.toggle('wrong', !currentWord.includes(letter));
-        });
-    }
 
-    // --- Check Win/Lose Condition ---
-    function checkGameStatus() {
-        const allGuessed = currentWord.split('').every(letter => guessedLetters.includes(letter));
-        if (allGuessed) {
-            messageDisplay.textContent = '🎉 You won!';
-            disableKeyboard();
-            newGameBtn.style.display = 'inline-block';
-            newWordBtn.style.display = 'inline-block';
-        } else if (incorrectGuesses >= maxIncorrectGuesses) {
-            messageDisplay.textContent = `💀 You lost! Word was: ${currentWord.toUpperCase()}`;
-            disableKeyboard();
-            newGameBtn.style.display = 'inline-block';
-            newWordBtn.style.display = 'inline-block';
-        }
+            // Mark correct/incorrect based on revealed letters only
+            if (guessedLetters.includes(letter)) {
+                const isCorrect = revealedLetters.includes(letter.toUpperCase()) || revealedLetters.includes(letter.toLowerCase());
+                key.classList.toggle('correct', isCorrect);
+                key.classList.toggle('wrong', !isCorrect);
+            }
+        });
     }
 
     // --- Disable Keyboard ---
@@ -143,11 +132,13 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#334155';
 
+        // Base
         ctx.beginPath();
         ctx.moveTo(10, 240);
         ctx.lineTo(190, 240);
         ctx.stroke();
 
+        // Stand
         ctx.beginPath();
         ctx.moveTo(50, 240);
         ctx.lineTo(50, 20);
@@ -155,29 +146,38 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineTo(140, 40);
         ctx.stroke();
 
+        // Head
         if (incorrectGuesses > 0) {
             ctx.beginPath();
             ctx.arc(140, 60, 20, 0, Math.PI * 2);
             ctx.stroke();
         }
+
+        // Body
         if (incorrectGuesses > 1) {
             ctx.beginPath();
             ctx.moveTo(140, 80);
             ctx.lineTo(140, 140);
             ctx.stroke();
         }
+
+        // Left Arm
         if (incorrectGuesses > 2) {
             ctx.beginPath();
             ctx.moveTo(140, 100);
             ctx.lineTo(110, 120);
             ctx.stroke();
         }
+
+        // Right Arm
         if (incorrectGuesses > 3) {
             ctx.beginPath();
             ctx.moveTo(140, 100);
             ctx.lineTo(170, 120);
             ctx.stroke();
         }
+
+        // Legs
         if (incorrectGuesses > 4) {
             ctx.beginPath();
             ctx.moveTo(140, 140);
@@ -188,13 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- New Game ---
+    // --- New Game Reload ---
     newGameBtn.addEventListener('click', () => {
         location.reload();
     });
 
-    // --- New Word ---
+    // --- New Word (Same Difficulty) ---
     newWordBtn.addEventListener('click', () => {
-        startGame(selectedDifficulty, selectedCategory);
+        startGame(selectedDifficulty);
     });
 });
