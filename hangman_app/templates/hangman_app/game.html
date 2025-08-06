@@ -114,18 +114,49 @@
         cursor: not-allowed;
     }
 
+    /* Guessed Word Display - Responsive */
+/* Guessed Word Display - Responsive */
+    #wordDisplay {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem; /* smaller gap */
+        margin-bottom: 1rem; /* reduce space */
+    }
+
     .guessed-letter {
-        display: inline-block;
-        width: 45px;
-        height: 60px;
-        line-height: 60px;
+        min-width: 35px; /* flexible instead of fixed */
+        padding: 8px 5px;
         text-align: center;
-        border-bottom: 4px solid #64748b;
-        margin: 0 6px;
-        font-size: 2.2rem;
-        font-weight: 800;
+        border-bottom: 3px solid #64748b;
+        font-size: 2rem;
+        font-weight: 700;
         color: #0f172a;
     }
+
+    /* On smaller screens adjust guessed letter size */
+    @media (max-width: 600px) {
+        .guessed-letter {
+            min-width: 28px;
+            padding: 6px 4px;
+            font-size: 1.5rem;
+        }
+
+        #remainingChances {
+            margin-top: 0.5rem; /* reduce space above */
+            margin-bottom: 1rem; /* reduce space below */
+        }
+
+        #wordDisplay {
+            gap: 0.2rem;
+            margin-bottom: 0.8rem;
+        }
+    }
+
+
+
+
+
 
     #gameCanvas {
         background-color: #f8fafc;
