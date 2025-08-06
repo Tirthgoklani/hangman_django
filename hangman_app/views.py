@@ -61,9 +61,11 @@ def guess_letter(request):
     lost = incorrect >= 5
 
     return JsonResponse({
-        'revealed': revealed,
-        'incorrect_guesses': incorrect,
-        'won': won,
-        'lost': lost,
-        'original_word': word if lost else None  # Only reveal if lost
-    })
+    'revealed': revealed,
+    'incorrect_guesses': incorrect,
+    'guessed_letters': guessed,  # <--- ADD THIS
+    'won': won,
+    'lost': lost,
+    'original_word': word if lost else None
+})
+
