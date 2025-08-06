@@ -2,6 +2,7 @@ import random
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Word
+from django.db.models.functions import Length
 
 WORD_LENGTHS = {
     'easy': 5,
@@ -17,7 +18,7 @@ def start_game(request):
     target_length = WORD_LENGTHS.get(difficulty, 5)
 
     # Pick a random category that contains a word of the correct length
-    eligible_words = Word.objects.filter(word__length=target_length)
+    eligible_words = Word.objects.annotate(word_len=Length('word')).filter(word_len=target_length)
     if not eligible_words.exists():
         return JsonResponse({'error': 'No eligible words found'}, status=404)
 
