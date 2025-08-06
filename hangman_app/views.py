@@ -36,7 +36,7 @@ def start_game(request):
     return JsonResponse({
         'category': selected.category,  # for hint
         'length': len(selected.word),
-        'max_incorrect': 5,
+        'max_incorrect': 6,  # Changed from 5 to 6 to allow right leg to appear
         'revealed': revealed  # ADD THIS - JavaScript expects this field
     })
 
@@ -63,7 +63,7 @@ def guess_letter(request):
 
     revealed = [l if l in guessed else '_' for l in word]
     won = '_' not in revealed
-    lost = incorrect >= 5
+    lost = incorrect >= 6  # Changed from 5 to 6
 
     return JsonResponse({
         'revealed': revealed,

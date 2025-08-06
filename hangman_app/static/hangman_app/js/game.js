@@ -1,7 +1,7 @@
 // --- Game State Variables ---
 let guessedLetters = [];
 let incorrectGuesses = 0;
-let maxIncorrectGuesses = 5;
+let maxIncorrectGuesses = 6;
 let selectedDifficulty = 'easy';
 let revealedLetters = [];
 
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
 
         // Head
-        if (incorrectGuesses > 0) {
+        if (incorrectGuesses >= 1) {
             ctx.beginPath();
             ctx.arc(250, 110, 30, 0, Math.PI * 2);
             ctx.stroke();
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Body
-        if (incorrectGuesses > 1) {
+        if (incorrectGuesses >= 2) {
             ctx.beginPath();
             ctx.moveTo(250, 140);
             ctx.lineTo(250, 200);
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Left Arm
-        if (incorrectGuesses > 2) {
+        if (incorrectGuesses >= 3) {
             ctx.beginPath();
             ctx.moveTo(250, 160);
             ctx.lineTo(210, 180);
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Right Arm
-        if (incorrectGuesses > 3) {
+        if (incorrectGuesses >= 4) {
             ctx.beginPath();
             ctx.moveTo(250, 160);
             ctx.lineTo(290, 180);
@@ -283,15 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Left Leg
-        if (incorrectGuesses > 4) {
+        if (incorrectGuesses >= 5) {
             ctx.beginPath();
             ctx.moveTo(250, 200);
             ctx.lineTo(210, 240);
             ctx.stroke();
         }
 
-        // Right Leg
-        if (incorrectGuesses > 5) {
+        // Right Leg - This was the missing piece!
+        if (incorrectGuesses >= 6) {
             ctx.beginPath();
             ctx.moveTo(250, 200);
             ctx.lineTo(290, 240);
