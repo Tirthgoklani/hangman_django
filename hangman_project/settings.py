@@ -119,10 +119,16 @@ USE_TZ = True
 import os
 
 STATIC_URL = '/static/'
+
+# In production only
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Whitenoise compression and caching
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 # Optional (if not already):
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
 

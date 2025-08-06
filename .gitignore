@@ -20,7 +20,7 @@ db.sqlite3
 !*/migrations/__init__.py
 
 # Static and media files (generated in prod)
-staticfiles/
+# staticfiles/
 static/
 media/
 

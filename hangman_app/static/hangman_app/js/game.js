@@ -25,25 +25,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Start Game Button ---
     startGameBtn.addEventListener('click', () => {
-        selectedDifficulty = difficultySelect.value;
-        selectedCategory = categorySelect.value;
-        selectionScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
-
-        startGame(selectedDifficulty, selectedCategory);
-
-        messageDisplay.textContent = '';
-        // newGameBtn.style.display = 'none';
-        // newWordBtn.style.display = 'none';
-        updateRemainingChances();
+        const difficulty = difficultySelect.value;
+        fetch(`/start_game/?difficulty=${difficulty}`)
+            .then(response => response.json())
+            .then(data => {
+                currentWord = "_".repeat(data.length);
+                incorrectGuesses = 0;
+                maxIncorrectGuesses = data.max_incorrect;
+                document.getElementById('category-hint').textContent = `Category Hint: ${data.category}`;
+                updateWordDisplay(currentWord);
+                createKeyboard();
+            });
     });
 
     // --- Start Game Function (merged) ---
     function startGame(difficulty, category) {
-        fetch(`/get_random_word/?difficulty=${difficulty}&category=${category}`)
+        fetch(`/get_random_word/?difficulty=${difficulty}`)
+
             .then(response => response.json())
             .then(data => {
                 currentWord = data.word.toLowerCase();
+                document.getElementById('category-hint').textContent = `Category Hint: ${data.category}`;
                 guessedLetters = [];
                 incorrectGuesses = 0;
 
@@ -84,20 +86,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Handle Letter Guess ---
-    function handleGuess(letter) {
-        if (!guessedLetters.includes(letter)) {
-            guessedLetters.push(letter);
+    function handleGuess(letter, button) {
+        fetch(`/guess_letter/?letter=${letter}`)
+            .then(response => response.json())
+            .then(data => {
+                currentWord = data.revealed.join('');
+                updateWordDisplay(currentWord);
+                updateKeyboardState();
 
-            if (!currentWord.includes(letter)) {
-                incorrectGuesses++;
-                drawHangman();
-            }
+                if (data.won) {
+                    messageDisplay.textContent = '🎉 You won!';
+                    disableKeyboard();
+                } else if (data.lost) {
+                    messageDisplay.textContent = `💀 You lost! Word was: ${data.original_word.toUpperCase()}`;
+                    disableKeyboard();
+                }
 
-            updateWordDisplay();
-            updateKeyboardState();
-            updateRemainingChances();
-            checkGameStatus();
-        }
+                updateRemainingChances(data.incorrect_guesses);
+            });
     }
 
     // --- Update Keyboard State ---
