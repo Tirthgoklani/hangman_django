@@ -4,7 +4,10 @@ services:
   - type: web
     name: hangman-django
     runtime: python
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+"
     startCommand: "gunicorn hangman_project.wsgi:application"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
