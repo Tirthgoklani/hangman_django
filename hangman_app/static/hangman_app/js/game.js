@@ -166,29 +166,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Update Keyboard State ---
-    function updateKeyboardState() {
-        const keys = document.querySelectorAll('.key');
-        keys.forEach(key => {
-            const letter = key.textContent.toLowerCase();
-            
-            if (guessedLetters.includes(letter)) {
-                key.disabled = true;
-                
-                // Check if letter is in the word
-                const isCorrect = revealedLetters.some(revealedLetter => 
-                    revealedLetter.toLowerCase() === letter && revealedLetter !== '_'
-                );
-                
-                if (isCorrect) {
-                    key.style.backgroundColor = '#16a34a'; // Green for correct
-                    key.style.color = 'white';
-                } else {
-                    key.style.backgroundColor = '#dc2626'; // Red for incorrect
-                    key.style.color = 'white';
-                }
+function updateKeyboardState() {
+    const keys = document.querySelectorAll('.key');
+    keys.forEach(key => {
+        const letter = key.textContent.toLowerCase();
+
+        if (guessedLetters.includes(letter)) {
+            key.disabled = true;
+
+            // ✅ If letter is present in revealedLetters -> correct
+            if (revealedLetters.includes(letter)) {
+                key.style.backgroundColor = '#16a34a'; // Green
+            } else {
+                key.style.backgroundColor = '#dc2626'; // Red
             }
-        });
-    }
+            key.style.color = 'white';
+        }
+    });
+}
+
 
     // --- Disable Keyboard ---
     function disableKeyboard() {
