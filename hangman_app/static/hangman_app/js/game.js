@@ -174,13 +174,16 @@ function updateKeyboardState() {
         if (guessedLetters.includes(letter)) {
             key.disabled = true;
 
-            // ✅ If letter is present in revealedLetters -> correct
-            if (revealedLetters.includes(letter)) {
+            // ✅ Simply check if revealedLetters still contains '_'
+            if (revealedLetters.includes(letter.toUpperCase()) || revealedLetters.includes(letter)) {
+                // Correct guess
                 key.style.backgroundColor = '#16a34a'; // Green
+                key.style.color = 'white';
             } else {
+                // Wrong guess
                 key.style.backgroundColor = '#dc2626'; // Red
+                key.style.color = 'white';
             }
-            key.style.color = 'white';
         }
     });
 }
